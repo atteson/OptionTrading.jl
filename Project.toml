@@ -1,0 +1,6 @@
+authors = ["Kevin Atteson <kevin@atteson.com>"]
+name = "OptionTrading"
+uuid = "21adceec-b210-11e8-3b5d-e95c5e6a0b7f"
+version = "0.1.0"
+
+[deps]
