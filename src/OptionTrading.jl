@@ -1,5 +1,8 @@
 module OptionTrading
 
+using Dates
+using BusinessDays
+
 function monthlyexpiration( date::Date )
     fdom = Dates.firstdayofmonth( date )
     thirdfriday = fdom + Dates.Day(mod(Dates.Friday - Dates.dayofweek(fdom), 7) + 14)
@@ -19,7 +22,7 @@ const calcexpirations = Dict(
     Dates.Month => monthlyexpiration,
 )
 
-function nextexpiration{T <: Dates.DatePeriod}( date::Date, period::Type{T} )
+function nextexpiration( date::Date, period::Type{T} ) where {T <: Dates.DatePeriod}
     calculator = calcexpirations[period]
     expiration = calculator( date )
     if date + Dates.Day(!isbday(:USNYSE,expiration)) >= expiration

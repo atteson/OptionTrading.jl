@@ -1,6 +1,8 @@
-authors = ["Kevin Atteson <kevin@atteson.com>"]
 name = "OptionTrading"
 uuid = "21adceec-b210-11e8-3b5d-e95c5e6a0b7f"
+authors = ["Kevin Atteson <kevin@atteson.com>"]
 version = "0.1.0"
 
 [deps]
+BusinessDays = "4f18b42c-503e-5345-9536-bb0f25fc7038"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
