@@ -3,10 +3,28 @@ module OptionTrading
 using Dates
 using BusinessDays
 using Commas
+using GCTools
 
-function thirdfriday( date::Date, n::Int )
+struct DateDict{V} <: AbstractDict{Date,V}
+    dict::Dict{Int,V}
+end
+
+DateDict{V}() where {V} = DateDict{V}( Dict{Int,V}() )
+
+Base.haskey( dict::DateDict, date::Date ) =
+    haskey( dict.dict, date.instant.periods.value )
+
+Base.getindex( dict::DateDict, date::Date ) =
+    getindex( dict.dict, date.instant.periods.value )
+
+Base.setindex!( dict::DateDict{V}, value::V, date::Date ) where {V} =
+    setindex!( dict.dict, value, date.instant.periods.value )
+
+Base.show( io::IO, dict::DateDict{V} ) where {V} = show( io, dict.dict )
+
+function thirdfriday( date::Date )
     fdom = Dates.firstdayofmonth( date )
-    result = fdom + Dates.Day(mod(Dates.Friday - Dates.dayofweek(fdom), 7) + (n-1)*7)
+    result = fdom + Dates.Day(mod(Dates.Friday - Dates.dayofweek(fdom), 7) + 14)
     # 04/18/2014 is a NYSE holiday but not a CBOE expiration date
     if isholiday( :USNYSE, result ) && result != Date( 2014, 4, 18 )
         result = advancebdays( :USNYSE, result, -1 )
@@ -15,7 +33,7 @@ function thirdfriday( date::Date, n::Int )
 end
 
 function monthlyexpiration( date::Date )
-    friday = thirdfriday( date, 3 )
+    friday = thirdfriday( date )
     increment = Dates.Day(1)
     # as per CBOE regulatory circular RG13-118
     if friday >= Date( 2015, 2, 1 ) && friday != Date( 2015, 12, 18 )
@@ -47,20 +65,41 @@ optionsoftype = Dict(
     :binary => ["BSZ","BSK","BSF",],
 )
 
-optiontype = Dict{String,Symbol}()
+roottype = CharN{5}
+const optiontype = Dict{roottype,Symbol}()
 for (t, roots) in optionsoftype
     for root in roots
-        optiontype[root] = t
+        optiontype[roottype( rpad( root, sizeof(roottype) ) )] = t
     end
 end
 
-function expiration( root::String, expiration::Date )
-    ot = optiontype[root]
-    if ot == :monthly
-        return DateTime( thirdfriday( expiration ), Time(9, 30) )
-    else
-        error( "Don't know expiration date and time for option type $ot" )
+const expirationcache = Dict{roottype, DateDict{DateTime}}()
+
+function expiration( root::roottype, expiration::Date,  optiontype::Dict{roottype, Symbol}, expirationcache::Dict{roottype, DateDict{DateTime}} )
+    GCTools.checkpoint( :haskey )
+    if !haskey( expirationcache, root )
+        GCTools.checkpoint( :setindex )
+        expirationcache[root] = DateDict{DateTime}()
     end
+    GCTools.checkpoint( :getindex )
+    rootexpirationcache = expirationcache[root]
+
+    GCTools.checkpoint( :haskey2 )
+    if !haskey( rootexpirationcache, expiration )
+        GCTools.checkpoint( :getindex2 )
+        ot = optiontype[root]
+        if ot == :monthly
+            GCTools.checkpoint( :thirdfriday )
+            rootexpirationcache[expiration] = thirdfriday( expiration ) + Time(9, 30)
+        else
+            error( "Don't know expiration date and time for option type $ot" )
+        end
+    end
+    GCTools.checkpoint( :getindex3 )
+    result = rootexpirationcache[expiration]
+    GCTools.checkpoint()
+    return result
 end
 
 end # module
+
