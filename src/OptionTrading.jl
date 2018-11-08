@@ -3,24 +3,26 @@ module OptionTrading
 using Dates
 using BusinessDays
 using Commas
-using GCTools
 
-struct DateDict{V} <: AbstractDict{Date,V}
+struct DateDict{K <: TimeType,V} <: AbstractDict{K,V}
     dict::Dict{Int,V}
 end
 
-DateDict{V}() where {V} = DateDict{V}( Dict{Int,V}() )
+DateDict{K, V}() where {K,V} = DateDict{K,V}( Dict{Int,V}() )
 
-Base.haskey( dict::DateDict, date::Date ) =
-    haskey( dict.dict, date.instant.periods.value )
+Base.haskey( dict::DateDict{K,V}, t::K ) where {K,V} =
+    haskey( dict.dict, t.instant.periods.value )
 
-Base.getindex( dict::DateDict, date::Date ) =
-    getindex( dict.dict, date.instant.periods.value )
+Base.getindex( dict::DateDict{K,V}, t::K ) where {K,V} =
+    getindex( dict.dict, t.instant.periods.value )
 
-Base.setindex!( dict::DateDict{V}, value::V, date::Date ) where {V} =
-    setindex!( dict.dict, value, date.instant.periods.value )
+Base.setindex!( dict::DateDict{K,V}, value::V, t::K ) where {K,V} =
+    setindex!( dict.dict, value, t.instant.periods.value )
 
-Base.show( io::IO, dict::DateDict{V} ) where {V} = show( io, dict.dict )
+Base.delete!( dict::DateDict{K,V}, t::K ) where {K,V} =
+    delete!( dict.dict, t.instant.periods.value )
+
+Base.show( io::IO, dict::DateDict{K,V} ) where {K,V} = show( io, dict.dict )
 
 function thirdfriday( date::Date )
     fdom = Dates.firstdayofmonth( date )
@@ -73,31 +75,23 @@ for (t, roots) in optionsoftype
     end
 end
 
-const expirationcache = Dict{roottype, DateDict{DateTime}}()
+const expirationcache = Dict{roottype, DateDict{Date,DateTime}}()
 
-function expiration( root::roottype, expiration::Date,  optiontype::Dict{roottype, Symbol}, expirationcache::Dict{roottype, DateDict{DateTime}} )
-    GCTools.checkpoint( :haskey )
+function expiration( root::roottype, expiration::Date,  optiontype::Dict{roottype, Symbol}, expirationcache::Dict{roottype, DateDict{Date,DateTime}} )
     if !haskey( expirationcache, root )
-        GCTools.checkpoint( :setindex )
-        expirationcache[root] = DateDict{DateTime}()
+        expirationcache[root] = DateDict{Date,DateTime}()
     end
-    GCTools.checkpoint( :getindex )
     rootexpirationcache = expirationcache[root]
 
-    GCTools.checkpoint( :haskey2 )
     if !haskey( rootexpirationcache, expiration )
-        GCTools.checkpoint( :getindex2 )
         ot = optiontype[root]
         if ot == :monthly
-            GCTools.checkpoint( :thirdfriday )
             rootexpirationcache[expiration] = thirdfriday( expiration ) + Time(9, 30)
         else
             error( "Don't know expiration date and time for option type $ot" )
         end
     end
-    GCTools.checkpoint( :getindex3 )
     result = rootexpirationcache[expiration]
-    GCTools.checkpoint()
     return result
 end
 
