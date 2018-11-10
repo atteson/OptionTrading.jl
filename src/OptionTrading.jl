@@ -24,6 +24,13 @@ Base.delete!( dict::DateDict{K,V}, t::K ) where {K,V} =
 
 Base.show( io::IO, dict::DateDict{K,V} ) where {K,V} = show( io, dict.dict )
 
+function Base.get( d::Dict{K,V}, k::K ) where {K,V}
+    if !haskey( d, k )
+        d[k] = V()
+    end
+    return d[k]
+end
+
 function thirdfriday( date::Date )
     fdom = Dates.firstdayofmonth( date )
     result = fdom + Dates.Day(mod(Dates.Friday - Dates.dayofweek(fdom), 7) + 14)
@@ -78,10 +85,7 @@ end
 const expirationcache = Dict{roottype, DateDict{Date,DateTime}}()
 
 function expiration( root::roottype, expiration::Date,  optiontype::Dict{roottype, Symbol}, expirationcache::Dict{roottype, DateDict{Date,DateTime}} )
-    if !haskey( expirationcache, root )
-        expirationcache[root] = DateDict{Date,DateTime}()
-    end
-    rootexpirationcache = expirationcache[root]
+    rootexpirationcache = get( expirationcache, root )
 
     if !haskey( rootexpirationcache, expiration )
         ot = optiontype[root]
