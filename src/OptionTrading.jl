@@ -4,6 +4,26 @@ using Dates
 using BusinessDays
 using Commas
 
+struct DateDict{K <: TimeType,V} <: AbstractDict{K,V}
+    dict::Dict{Int,V}
+end
+
+DateDict{K, V}() where {K,V} = DateDict{K,V}( Dict{Int,V}() )
+
+Base.haskey( dict::DateDict{K,V}, t::K ) where {K,V} =
+    haskey( dict.dict, t.instant.periods.value )
+
+Base.getindex( dict::DateDict{K,V}, t::K ) where {K,V} =
+    getindex( dict.dict, t.instant.periods.value )
+
+Base.setindex!( dict::DateDict{K,V}, value::V, t::K ) where {K,V} =
+    setindex!( dict.dict, value, t.instant.periods.value )
+
+Base.delete!( dict::DateDict{K,V}, t::K ) where {K,V} =
+    delete!( dict.dict, t.instant.periods.value )
+
+Base.show( io::IO, dict::DateDict{K,V} ) where {K,V} = show( io, dict.dict )
+
 function Base.get( d::Dict{K,V}, k::K ) where {K,V}
     if !haskey( d, k )
         d[k] = V()
@@ -62,9 +82,9 @@ for (t, roots) in optionsoftype
     end
 end
 
-const expirationcache = Dict{roottype, Dict{Date,DateTime}}()
+const expirationcache = Dict{roottype, DateDict{Date,DateTime}}()
 
-function expiration( root::roottype, expiration::Date,  optiontype::Dict{roottype, Symbol}, expirationcache::Dict{roottype, Dict{Date,DateTime}} )
+function expiration( root::roottype, expiration::Date,  optiontype::Dict{roottype, Symbol}, expirationcache::Dict{roottype, DateDict{Date,DateTime}} )
     rootexpirationcache = get( expirationcache, root )
 
     if !haskey( rootexpirationcache, expiration )
