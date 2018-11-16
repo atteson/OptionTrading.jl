@@ -22,6 +22,20 @@ Base.setindex!( dict::DateDict{K,V}, value::V, t::K ) where {K,V} =
 Base.delete!( dict::DateDict{K,V}, t::K ) where {K,V} =
     delete!( dict.dict, t.instant.periods.value )
 
+Base.length( dict::DateDict{K,V} ) where {K,V} = length( dict.dict )
+
+periodtype( ::Type{Dates.UTInstant{P}} ) where {P <: Period} = P
+
+fromint( ::Type{D}, i::Int ) where {D <: TimeType} =
+    D( Dates.UTInstant( periodtype( fieldtypes(D)[1] )( i ) ) )
+
+function Base.iterate( dict::DateDict{K,V}, s = 0 ) where {K,V}
+    result = iterate( dict.dict, s )
+    result == nothing && return result
+    ((k, v), s) = result
+    return (fromint( K, k ) => v, s )
+end
+
 Base.show( io::IO, dict::DateDict{K,V} ) where {K,V} = show( io, dict.dict )
 
 function Base.get( d::Dict{K,V}, k::K ) where {K,V}

@@ -2,14 +2,14 @@
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
 [[BusinessDays]]
-deps = ["Dates", "Pkg", "Test"]
+deps = ["Dates", "Test"]
 git-tree-sha1 = "5aa63ecf49a6dad0799939606b7bb63a047452b0"
 uuid = "4f18b42c-503e-5345-9536-bb0f25fc7038"
 version = "0.9.0"
 
 [[Commas]]
 deps = ["BusinessDays", "Dates", "Formatting", "JSON", "Mmap"]
-git-tree-sha1 = "3a403bc13988233535f65ae3c17b20424016b9f5"
+git-tree-sha1 = "cd2e075b80b8a8665311dec395d3e17ef1ec5c6b"
 repo-rev = "master"
 repo-url = "/home/atteson/.julia/dev/Commas"
 uuid = "acc5c61a-a0db-11e8-1c12-8dfca70fca33"
@@ -17,9 +17,9 @@ version = "0.1.0"
 
 [[Compat]]
 deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
-git-tree-sha1 = "2d9e14d19bad3f9ad5cc5e4cffabc3cfa59de825"
+git-tree-sha1 = "ec61a16eed883ad0cfa002d7489b3ce6d039bb9a"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "1.3.0"
+version = "1.4.0"
 
 [[Dates]]
 deps = ["Printf"]
@@ -44,7 +44,7 @@ deps = ["LinearAlgebra", "Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
 [[JSON]]
-deps = ["Dates", "Distributed", "Mmap", "Pkg", "Sockets", "Test", "Unicode"]
+deps = ["Dates", "Distributed", "Mmap", "Sockets", "Test", "Unicode"]
 git-tree-sha1 = "fec8e4d433072731466d37ed0061b3ba7f70eeb9"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.19.0"
@@ -111,7 +111,7 @@ deps = ["Distributed", "InteractiveUtils", "Logging", "Random"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[UUIDs]]
-deps = ["Random"]
+deps = ["Random", "SHA"]
 uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
 [[Unicode]]
