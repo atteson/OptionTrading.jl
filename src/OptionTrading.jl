@@ -96,20 +96,19 @@ for (t, roots) in optionsoftype
     end
 end
 
-const expirationcache = Dict{roottype, DateDict{Date,DateTime}}()
+# returns when the settlement value is determined
+function settlement( root::roottype, expiration::Date,  optiontype::Dict{roottype, Symbol}, settlementcache::Dict{roottype, DateDict{Date,DateTime}} )
+    rootsettlementcache = get( settlementcache, root )
 
-function expiration( root::roottype, expiration::Date,  optiontype::Dict{roottype, Symbol}, expirationcache::Dict{roottype, DateDict{Date,DateTime}} )
-    rootexpirationcache = get( expirationcache, root )
-
-    if !haskey( rootexpirationcache, expiration )
+    if !haskey( rootsettlementcache, expiration )
         ot = optiontype[root]
         if ot == :monthly
-            rootexpirationcache[expiration] = thirdfriday( expiration ) + Time(9, 30)
+            rootsettlementcache[expiration] = thirdfriday( expiration ) + Time(9, 30)
         else
             error( "Don't know expiration date and time for option type $ot" )
         end
     end
-    result = rootexpirationcache[expiration]
+    result = rootsettlementcache[expiration]
     return result
 end
 
