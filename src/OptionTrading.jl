@@ -103,7 +103,12 @@ function settlement( root::roottype, expiration::Date,  optiontype::Dict{roottyp
     if !haskey( rootsettlementcache, expiration )
         ot = optiontype[root]
         if ot == :monthly
-            rootsettlementcache[expiration] = thirdfriday( expiration ) + Time(9, 30)
+            date = thirdfriday( expiration )
+            if isholiday( :USNYSE, date )
+                rootsettlementcache[expiration] = advancebdays( :USNYSE, date, -1 ) + Time(16, 00)
+            else
+                rootsettlementcache[expiration] = date + Time(9, 30)
+            end
         else
             error( "Don't know expiration date and time for option type $ot" )
         end
