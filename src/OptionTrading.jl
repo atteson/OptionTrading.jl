@@ -97,7 +97,8 @@ for (t, roots) in optionsoftype
 end
 
 # returns when the settlement value is determined
-function settlement( root::roottype, expiration::Date,  optiontype::Dict{roottype, Symbol}, settlementcache::Dict{roottype, DateDict{Date,DateTime}} )
+function settlement( root::roottype, expiration::Date,
+                     optiontype::Dict{roottype, Symbol}, settlementcache::Dict{roottype, DateDict{Date,DateTime}} )
     rootsettlementcache = get( settlementcache, root )
 
     if !haskey( rootsettlementcache, expiration )
