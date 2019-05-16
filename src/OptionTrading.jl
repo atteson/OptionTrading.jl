@@ -79,7 +79,8 @@ function nextexpiration( date::Date, period::Type{T} ) where {T <: Dates.DatePer
 end
 
 optionsoftype = Dict(
-    :monthly => ["SYF", "SYG", "SVP", "SZU", "SXZ", "SXM", "SZP", "SYU", "SXB", "SPV", "SPT", "SYV", "SPZ", "SPQ", "SPX", "SPB", "SXY",],
+    :monthly => ["SYF", "SYG", "SVP", "SZU", "SXZ", "SXM", "SZP", "SYU", "SXB", "SPV", "SPT", "SYV", "SPZ", "SPQ", "SPX", "SPB",
+                 "SXY",],
     :weekly => ["JXA", "JXB", "SPXW",],
     :pm => ["SPXPM",],
     :variancestrip => ["VSTRP",],
