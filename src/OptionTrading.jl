@@ -65,8 +65,18 @@ function monthlyexpiration( date::Date )
     return friday + increment
 end
 
+function weeklyexpiration( date::Date )
+    expirationdate = date + Dates.Day(mod(Dates.Friday - Dates.dayofweek(date) - 1, 7) + 1)
+    monthly = monthlyexpiration( date )
+    if Day(0) < monthly - expirationdate < Day(2)
+        expirationdate = monthly
+    end
+    return expirationdate
+end
+
 const calcexpirations = Dict(
     Dates.Month => monthlyexpiration,
+    Dates.Week => weeklyexpiration,
 )
 
 function nextexpiration( date::Date, period::Type{T} ) where {T <: Dates.DatePeriod}
@@ -111,6 +121,8 @@ function settlement( root::roottype, expiration::Date,
             else
                 rootsettlementcache[expiration] = date + Time(9, 30)
             end
+        elseif ot == :weekly
+            
         else
             error( "Don't know expiration date and time for option type $ot" )
         end
