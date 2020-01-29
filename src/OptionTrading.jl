@@ -3,6 +3,8 @@ module OptionTrading
 using Dates
 using BusinessDays
 using Commas
+using Roots
+using Distributions
 
 struct DateDict{K <: TimeType,V} <: AbstractDict{K,V}
     dict::Dict{Int,V}
@@ -130,6 +132,16 @@ function settlement( root::roottype, expiration::Date,
     result = rootsettlementcache[expiration]
     return result
 end
+
+const normal = Normal()
+
+function put( S, K, sigma, dt )
+    remvol = sigma * sqrt(dt)
+    moneyness = log( S/K )/remvol
+    return K * cdf( normal, remvol/2 - moneyness ) - S * cdf( normal, -moneyness - remvol/2 )
+end
+
+impliedputvol( S, K, dt, price ) = find_zero( s->put( S, K, s, dt ) - price, (0.0, 1000.0) )
 
 end # module
 
