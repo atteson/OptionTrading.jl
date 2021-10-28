@@ -141,7 +141,21 @@ function put( S, K, sigma, dt )
     return K * cdf( normal, remvol/2 - moneyness ) - S * cdf( normal, -moneyness - remvol/2 )
 end
 
-impliedputvol( S, K, dt, price ) = find_zero( s->put( S, K, s, dt ) - price, (0.0, 1000.0) )
+function call( S, K, sigma, dt )
+    remvol = sigma * sqrt(dt)
+    moneyness = log( S/K )/remvol
+    return S * cdf( normal, remvol/2 + moneyness ) - K * cdf( normal, moneyness - remvol/2 )
+end
+
+type_prices = Dict(
+    (UInt8('P'),) => put,
+    (UInt8('C'),) => call,
+)
+
+impliedvol( type, S, K, dt, price ) =
+    let f = type_prices[type]
+        find_zero( s->f( S, K, s, dt ) - price, (0.0, 1000.0) )
+    end
 
 end # module
 
