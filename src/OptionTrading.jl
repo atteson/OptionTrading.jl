@@ -135,27 +135,25 @@ end
 
 const normal = Normal()
 
-function put( S, K, sigma, dt )
+intrinsicvalue( sign, S, K ) = max(sign*(S - K),0)
+
+function price( sign, S, K, sigma, dt )
     remvol = sigma * sqrt(dt)
     moneyness = log( S/K )/remvol
-    return K * cdf( normal, remvol/2 - moneyness ) - S * cdf( normal, -moneyness - remvol/2 )
+    return sign * ( S * cdf( normal, sign*(moneyness + remvol/2) ) - K * cdf( normal, sign*(moneyness - remvol/2) ) )
 end
 
-function call( S, K, sigma, dt )
-    remvol = sigma * sqrt(dt)
-    moneyness = log( S/K )/remvol
-    return S * cdf( normal, remvol/2 + moneyness ) - K * cdf( normal, moneyness - remvol/2 )
-end
+put( S, K, sigma, dt ) = price( -1, S, K, sigma, dt )
+call( S, K, sigma, dt ) = price( 1, S, K, sigma, dt )
 
-type_prices = Dict(
-    (UInt8('P'),) => put,
-    (UInt8('C'),) => call,
-)
-
-impliedvol( type, S, K, dt, price ) =
-    let f = type_prices[type]
-        find_zero( s->f( S, K, s, dt ) - price, (0.0, 1000.0) )
+function impliedvol( sign, S, K, dt, P; lower = 0.0, upper = 1000.0 )
+    lo = price( sign, S, K, lower, dt )
+    hi = price( sign, S, K, upper, dt )
+    if !( lo < P < hi )
+        return NaN
     end
+    return find_zero( s->price( sign, S, K, s, dt ) - P, (lower, upper) )
+end
 
 end # module
 
